@@ -1,0 +1,56 @@
+const { StatusCodes } = require("http-status-codes");
+const AppErrors = require("../utils/errors/app-errors");
+class CrudRepository {
+    constructor(model) {
+        this.model = model;
+    }
+
+    async create(data) {
+        const response = await this.model.create(data);
+        return response;
+    }
+
+    async destory(data) {
+        const response = await this.model.destroy({
+            where: {
+                id: data,
+            },
+        });
+        console.log(typeof response);
+        if (!response) {
+            throw new AppErrors(
+                "Not able to find the resource",
+                StatusCodes.NOT_FOUND
+            );
+        }
+        return response;
+    }
+
+    async get(data) {
+        const response = await this.model.findByPk(data);
+        return response;
+    }
+
+    async getAll() {
+        const response = await this.model.findAll();
+        return response;
+    }
+
+    async update(id, data) {
+        const response = await this.model.update(data, {
+            where: {
+                id: id,
+            },
+        });
+        console.log(response);
+        if (response[0] == 0) {
+            throw new AppErrors(
+                "Cannot find the resource",
+                StatusCodes.NOT_FOUND
+            );
+        }
+        return response;
+    }
+}
+
+module.exports = CrudRepository;
