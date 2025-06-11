@@ -1,5 +1,5 @@
 const CrudRepository = require("./crud-repository");
-const { Flight } = require("../models");
+const { Flight, Airplane, Airport, City } = require("../models");
 const { Op } = require("sequelize");
 
 class FlightRepository extends CrudRepository {
@@ -7,10 +7,32 @@ class FlightRepository extends CrudRepository {
         super(Flight);
     }
     async getAllFlights(customFilter, sortfilter) {
-        console.log("📦 Filter received in repository:", customFilter); // ✅ Add this
-        const flights = Flight.findAll({
+        const flights = await Flight.findAll({
             where: customFilter,
             order: sortfilter,
+            include: [
+                {
+                    model: Airplane,
+                    as: "airplane",
+                    required: true, // optional: forces INNER JOIN
+                },
+                {
+                    model: Airport,
+                    as: "departureAirport",
+                    required: false, // or true, based on your use case
+                    include: {
+                        model: City,
+                        as: "city",
+                    },
+                },
+                {
+                    model: Airport,
+                    as: "arrivalAirport",
+
+                    required: false,
+                    include: { model: City, as: "city" },
+                },
+            ],
         });
         return flights;
     }
